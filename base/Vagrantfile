@@ -1,0 +1,34 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "precise64"
+
+  config.vm.network :private_network, ip: "{{ip}}"
+
+  config.vm.synced_folder "www", "/var/www/elefant", :nfs => true
+
+  config.vm.provision :chef_solo do |chef|
+  	chef.cookbooks_path = "../chef/cookbooks"
+    chef.roles_path = "../chef/roles"
+    chef.data_bags_path = "../chef/data_bags"
+    chef.add_recipe "apt"
+    chef.add_recipe "vim"
+    chef.add_recipe "postfix"
+    chef.add_recipe "mysql::server"
+    chef.add_recipe "sqlite"
+    chef.add_recipe "php"
+    chef.add_recipe "php::module_mysql"
+    chef.add_recipe "php::module_curl"
+    chef.add_recipe "php::module_gd"
+    chef.add_recipe "php::module_memcache"
+    chef.add_recipe "php::module_sqlite3"
+    chef.add_recipe "apache2"
+    chef.add_recipe "elefant::web"
+
+    chef.json = {
+      :mysql => {
+        :server_debian_password => "supersecret",
+        :server_root_password => "supersecret",
+        :server_repl_password => "supersecret"
+      }
+    }
+  end
+end

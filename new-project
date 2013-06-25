@@ -1,0 +1,74 @@
+#!/usr/bin/env php
+<?php
+
+/**
+ * This script will generate a new vm for a project
+ * and call `vagrant up` to initialize it based on
+ * the Vagrantfile found in base/Vagrantfile.
+ *
+ * Must be run via sudo like this:
+ *
+ *     sudo ./new-project myproject
+ *
+ * To also install Elefant into the shared folder, use:
+ *
+ *     sudo ./new-project myproject elefant
+ */
+
+chdir (__DIR__);
+date_default_timezone_set ('GMT');
+
+if (count ($argv) === 1) {
+	die ("Usage: sudo ./new-project projectname [elefant]\n");
+}
+
+$uid = (int) shell_exec ('echo $UID');
+if ($uid !== 0) {
+	die ("Usage: sudo ./new-project projectname [elefant]\n");
+}
+
+$proj = $argv[1];
+echo "Adding site: www.$proj.dev\n";
+
+$elefant = (count ($argv) == 3 && ($argv[2] === 'elefant' || $argv[2] === 'e')) ? true : false;
+
+/**
+ * Add project to /etc/hosts.
+ */
+echo "Updating /etc/hosts\n";
+$ip = sprintf ('192.168.%d.%d', rand (2, 255), rand (2, 255));
+system (sprintf ('echo "%s    www.%s.dev" >> /etc/hosts', $ip, $proj));
+
+/**
+ * Duplicate the base project.
+ */
+mkdir ($proj);
+mkdir ($proj . '/www');
+$conf = file_get_contents ('base/Vagrantfile');
+$conf = str_replace ('{{ip}}', $ip, $conf);
+file_put_contents ($proj . '/Vagrantfile', $conf);
+chdir ($proj);
+
+/**
+ * Fetch Elefant if needed.
+ */
+if ($elefant) {
+	system ('git clone git@github.com:jbroadway/elefant.git www');
+	chdir ('www');
+	system ('chmod 777 apps && chmod -R 777 cache conf css files lang layouts');
+	chdir ('..');
+}
+
+/**
+ * Reset file ownership.
+ */
+$user = trim (shell_exec ('who am i | sed -e "s/ .*//"'));
+system ("chown -R $user . .vagrant");
+
+/**
+ * Start the vm.
+ */
+system ('vagrant up');
+echo "\nNew site available at:\n\n    http://www.$proj.dev/\n\n";
+
+?>
