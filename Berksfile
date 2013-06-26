@@ -1,0 +1,16 @@
+site :opscode
+
+cookbook 'apache2'
+cookbook 'apt'
+cookbook 'build-essential'
+cookbook 'elefant'
+cookbook 'git'
+cookbook 'homebrew'
+cookbook 'mysql'
+cookbook 'nginx'
+cookbook 'ohai'
+cookbook 'openssl'
+cookbook 'php'
+cookbook 'postfix'
+cookbook 'sqlite'
+cookbook 'vim'
