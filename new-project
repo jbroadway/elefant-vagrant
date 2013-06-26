@@ -33,10 +33,13 @@ echo "Adding site: www.$proj.dev\n";
 $elefant = (count ($argv) == 3 && ($argv[2] === 'elefant' || $argv[2] === 'e')) ? true : false;
 
 /**
- * Add project to /etc/hosts.
+ * Generate unique IP and add project to /etc/hosts.
  */
 echo "Updating /etc/hosts\n";
-$ip = sprintf ('192.168.%d.%d', rand (2, 255), rand (2, 255));
+$hosts = file_get_contents ('/etc/hosts');
+do {
+	$ip = sprintf ('192.168.%d.%d', rand (2, 255), rand (2, 255));
+} while (strpos ($hosts, $ip) !== false);
 system (sprintf ('echo "%s    www.%s.dev" >> /etc/hosts', $ip, $proj));
 
 /**
@@ -53,14 +56,14 @@ chdir ($proj);
  * Fetch Elefant if needed.
  */
 if ($elefant) {
-	system ('git clone git@github.com:jbroadway/elefant.git www');
+	system ('git clone https://github.com/jbroadway/elefant.git www');
 	chdir ('www');
 	system ('chmod 777 apps && chmod -R 777 cache conf css files lang layouts');
 	chdir ('..');
 }
 
 /**
- * Reset file ownership.
+ * Reset file ownership since we're running under sudo.
  */
 $user = trim (shell_exec ('who am i | sed -e "s/ .*//"'));
 system ("chown -R $user . .vagrant");
