@@ -27,7 +27,8 @@ setup like this:
 	berks install
 
 This will create a `~/projects` folder, under which all of your web
-projects will be run.
+projects will be run, and install the Chef recipes needed for your
+virtual machines.
 
 Now to create your first project, use:
 
