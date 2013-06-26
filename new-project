@@ -22,6 +22,9 @@ if (count ($argv) === 1) {
 	die ("Usage: sudo ./new-project projectname [elefant]\n");
 }
 
+/**
+ * Ensure we're running under sudo.
+ */
 $uid = (int) shell_exec ('echo $UID');
 if ($uid !== 0) {
 	die ("Usage: sudo ./new-project projectname [elefant]\n");
